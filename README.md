@@ -44,7 +44,7 @@ Participant code is run outside this repository. Submissions are scored in CI ag
 - Public leaderboard: Auto-updated after merged submissions
 
 <div align="center">
-    <img src="images/IMG4.png" width='500' /> 
+    <img src="images/IMG4.jpeg" width='500' /> 
 </div>
 
 <br>
