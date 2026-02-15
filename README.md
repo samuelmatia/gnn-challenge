@@ -21,7 +21,7 @@
   <!--- BADGES: START --->
 [![GitHub license](https://img.shields.io/badge/License-MIT-green.svg?logo=github)](https://lbesson.mit-license.org/)
 [![GitHub license](https://img.shields.io/badge/License-CC--BY--SA--4.0-green.svg?logo=github)](https://creativecommons.org/licenses/by-sa/4.0/)
-[![Leaderboard](https://img.shields.io/badge/Leaderboard-IneqMath-FFD21E?logo=Hoppscotch)](https://mubarraqqq.github.io/gnn-challenge/leaderboard.html)
+[![Leaderboard](https://img.shields.io/badge/Website-IneqMath-2176BC?logo=GoogleChrome)](https://mubarraqqq.github.io/gnn-challenge/leaderboard.html)
 
 <!--- BADGES: END --->
 
