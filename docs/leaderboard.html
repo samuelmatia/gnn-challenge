@@ -17,14 +17,14 @@
     <div class="hero-inner">
       <p class="kicker">cfRNA GNN Benchmark</p>
       <h1>Leaderboard</h1>
-      <p class="hero-subtitle">Human and LLM submissions evaluated on the hidden test split.</p>
+      <p class="hero-subtitle">Public leaderboard contains team (GitHub repo), rank, and final metrics.</p>
     </div>
   </header>
 
   <main class="container">
     <section class="stats" aria-label="Leaderboard summary">
       <article class="stat-card">
-        <p class="stat-label">Total Submissions</p>
+        <p class="stat-label">Total Entries</p>
         <p class="stat-value" id="statTotal">-</p>
       </article>
       <article class="stat-card">
@@ -37,23 +37,7 @@
       </article>
     </section>
 
-    <section class="controls" aria-label="Filters and sorting">
-      <label class="field">
-        <span class="field-label">Search</span>
-        <input id="search" type="search" placeholder="Team, run, model, submitter..." />
-      </label>
-
-      <label class="field">
-        <span class="field-label">Model Type</span>
-        <select id="typeFilter">
-          <option value="all">All types</option>
-          <option value="human">Human</option>
-          <option value="llm">LLM</option>
-          <option value="hybrid">Human + LLM</option>
-          <option value="unknown">Unknown</option>
-        </select>
-      </label>
-
+    <section class="controls" aria-label="Sorting">
       <label class="field">
         <span class="field-label">Sort</span>
         <select id="sortBy">
@@ -61,7 +45,6 @@
           <option value="accuracy">Accuracy</option>
           <option value="precision">Precision</option>
           <option value="recall">Recall</option>
-          <option value="submission_date">Submission date</option>
         </select>
       </label>
     </section>
@@ -74,20 +57,15 @@
           <tr>
             <th>Rank</th>
             <th>Team</th>
-            <th>Run</th>
-            <th>Model</th>
-            <th>Type</th>
             <th>F1</th>
             <th>Accuracy</th>
             <th>Precision</th>
             <th>Recall</th>
-            <th>Date</th>
-            <th>Submitter</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
-      <p class="empty-state" id="emptyState" hidden>No submissions match your current filters.</p>
+      <p class="empty-state" id="emptyState" hidden>No leaderboard rows available.</p>
     </section>
   </main>
 

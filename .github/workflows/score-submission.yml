@@ -143,16 +143,17 @@ jobs:
         env:
           SUBMITTER: ${{ steps.find_submission.outputs.submitter }}
           PR_NUMBER: ${{ steps.find_submission.outputs.pr_number }}
+          HEAD_REPO: ${{ steps.find_submission.outputs.head_repo }}
           TEAM: ${{ steps.find_submission.outputs.team }}
           RUN_ID: ${{ steps.find_submission.outputs.run_id }}
         run: |
-          mkdir -p "submissions/inbox/${TEAM}/${RUN_ID}"
-          cp /tmp/pr_predictions.csv "submissions/inbox/${TEAM}/${RUN_ID}/predictions.csv"
+          mkdir -p "/tmp/submissions/inbox/${TEAM}/${RUN_ID}"
+          cp /tmp/pr_predictions.csv "/tmp/submissions/inbox/${TEAM}/${RUN_ID}/predictions.csv"
           # Merge submitter info into metadata.json
           python - <<'PY'
           import json
           import os
-          meta_path = "submissions/inbox/${TEAM}/${RUN_ID}/metadata.json"
+          meta_path = "/tmp/submissions/inbox/${TEAM}/${RUN_ID}/metadata.json"
           try:
               with open("/tmp/pr_metadata.json", "r", encoding="utf-8") as f:
                   meta = json.load(f)
@@ -160,21 +161,27 @@ jobs:
               meta = {}
           meta["submitter"] = os.environ.get("SUBMITTER", "")
           meta["pr_number"] = os.environ.get("PR_NUMBER", "")
+          head_repo = os.environ.get("HEAD_REPO", "")
+          if head_repo:
+              meta["team"] = head_repo.split("/")[-1]
           team = os.environ.get("TEAM", "")
           run_id = os.environ.get("RUN_ID", "")
-          meta_path = f"submissions/inbox/{team}/{run_id}/metadata.json"
+          meta_path = f"/tmp/submissions/inbox/{team}/{run_id}/metadata.json"
           with open(meta_path, "w", encoding="utf-8") as f:
               json.dump(meta, f, indent=2)
           PY
+          export SUBMISSIONS_DIR=/tmp/submissions/inbox
           python update_leaderboard.py
           python competition/render_leaderboard.py
+          rm -rf "submissions/inbox/${TEAM}/${RUN_ID}"
 
       - name: Commit leaderboard update
         if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
         run: |
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
-          git add leaderboard/leaderboard.csv docs/leaderboard.csv leaderboard.md submissions/inbox
+          git add leaderboard/leaderboard.csv docs/leaderboard.csv leaderboard.md
+          git add -A submissions/inbox
           git commit -m "Update leaderboard with new submission" || true
           git push
 

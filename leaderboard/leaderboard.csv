@@ -1,4 +1,4 @@
-rank,team,run_id,model,model_type,f1_score,accuracy,precision,recall,submission_date,submitter,submitter_url,pr_number,submission_path
-1,my_team_1,run_005,Log Model,human,0.350020618556701,0.36036036036036034,0.24074074074074073,0.3023255813953488,2026-02-11 21:43,mubbytheback,https://github.com/mubbytheback,15,submissions/inbox/my_team_1/run_005/predictions.csv
-2,organizers,advanced_gnn,Advanced GNN (GraphSAGE),organizers,0.33390058217644425,0.3963963963963964,0.14705882352941177,0.11627906976744186,2026-02-07 18:04,mubarraqqq,https://github.com/mubarraqqq,,submissions/inbox/organizers/advanced_gnn/predictions.csv
-3,organizers,baseline_mlp,Baseline MLP,organizers,0.32672131147540984,0.3333333333333333,0.22807017543859648,0.3023255813953488,2026-02-07 18:04,mubarraqqq,https://github.com/mubarraqqq,,submissions/inbox/organizers/baseline_mlp/predictions.csv
+rank,team,f1_score,accuracy,precision,recall
+1,my_team_1,0.350020618556701,0.36036036036036034,0.24074074074074073,0.3023255813953488
+2,advanced_gnn_preds,0.33390058217644425,0.3963963963963964,0.14705882352941177,0.11627906976744186
+3,baseline_mlp_preds,0.32672131147540984,0.3333333333333333,0.22807017543859648,0.3023255813953488
