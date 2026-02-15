@@ -158,4 +158,4 @@ No. You only submit prediction files.
 Maintainers. The leaderboard updates after merge.
 
 **Can I submit multiple runs?**  
-Yes. Use a new `<run_id>` for each submission.
+No. Only one submission attempt per participant is allowed and enforced in CI.
