@@ -15,6 +15,7 @@
 This repository hosts a prediction-only challenge focused on maternal-fetal health modeling using graph learning.
 Participant code is run outside this repository. Submissions are scored in CI against hidden labels.
 
+**[🏆 Click me to join competition](https://aiikram.github.io/gnn-parkinsons-challenge/leaderboard.html)** 
 ## Scientific Focus
 
 - Inductive graph learning across cfRNA and placental transcriptomics to detect maternal-fetal health issues.
