@@ -14,29 +14,11 @@ function setStatus(message, isError = false) {
 }
 
 async function loadCSV() {
-  if (window.location.protocol === 'file:') {
-    throw new Error('Cannot fetch CSV from file://. Serve docs over HTTP.');
+  const response = await fetch('leaderboard.csv');
+  if (!response.ok) {
+    throw new Error('Failed to load leaderboard.csv');
   }
-
-  const candidates = [
-    'leaderboard.csv',
-    './leaderboard.csv',
-    '/gnn-challenge/leaderboard.csv',
-    'docs/leaderboard.csv'
-  ];
-
-  for (const path of candidates) {
-    try {
-      const response = await fetch(path, { cache: 'no-store' });
-      if (response.ok) {
-        return parseCSV(await response.text());
-      }
-    } catch (_) {
-      // Try next candidate.
-    }
-  }
-
-  throw new Error('Failed to load leaderboard.csv from known paths.');
+  return parseCSV(await response.text());
 }
 
 function parseCSV(text) {
@@ -119,10 +101,7 @@ function applySort(rows) {
     els.sortBy.addEventListener('change', () => applySort(rows));
   } catch (error) {
     console.error(error);
-    const message = window.location.protocol === 'file:'
-      ? 'Open this page through a local server (not file://) to load leaderboard.csv.'
-      : 'Unable to load leaderboard data. Hard refresh and verify leaderboard.csv is deployed.';
-    setStatus(message, true);
+    setStatus('Unable to load leaderboard data. Check leaderboard.csv availability.', true);
     els.emptyState.hidden = false;
     els.emptyState.textContent = 'Leaderboard data could not be loaded.';
   }
