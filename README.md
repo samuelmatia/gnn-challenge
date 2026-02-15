@@ -63,7 +63,7 @@ Participant code is run outside this repository. Submissions are scored in CI ag
 - Support research in maternal-fetal health and early detection of preeclampsia.
 - Integrate gene expression and clinical metadata to capture subtle risk patterns while handling noisy and imbalanced data for robust and equitable predictions.
 
-### Mandatory Graph Specification
+### 🧩 Mandatory Graph Specification
 
 This competition explicitly provides both required graph components:
 
@@ -81,15 +81,20 @@ Interpretation:
 - `A[i, j] = 1` indicates an edge between nodes `i` and `j`, else `0`
 - `X` is node-by-feature and includes harmonized expression features and released covariates
 
-### Difficulty and Realism
+### 🌍 Dataset Difficulty and Realism
 
 The benchmark includes meaningful modeling difficulty:
 
-- Noisy and partially missing metadata
-- Label imbalance pressure
-- High-dimensional features relative to sample size
-- Cross-domain distribution shift (cfRNA -> placenta)
-- Inductive generalization to unseen test nodes
+- 🧪 Noisy and partially missing metadata
+- ⚖️ Label imbalance pressure
+- 🧬 High-dimensional features relative to sample size (sparsity pressure)
+- 🔄 Cross-domain distribution shift (cfRNA -> placenta)
+- 🕸️ Inductive generalization to unseen test nodes
+
+### ⏱️ Computational Affordability
+
+- Full training should not exceed **3 hours on CPU** per competition.
+- If needed, downsize graph complexity (for example by reducing node count, edge density, or neighborhood sampling size) while preserving task integrity.
 
 ## Dataset Construction and Preprocessing
 

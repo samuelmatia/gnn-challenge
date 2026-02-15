@@ -9,6 +9,11 @@ Participant training code is not executed here.
 - One submission attempt per participant is allowed.
 - Enforcement is automatic in CI.
 
+## ⚙️ Compute Budget
+
+- Full training should not exceed **3 hours on CPU** per competition.
+- If your pipeline is too slow, downsize graph complexity (for example fewer nodes/edges, smaller sampled neighborhoods, or lighter model depth).
+
 ## Quick Start
 
 1. Fork the repository.
@@ -49,7 +54,7 @@ Example metadata:
 }
 ```
 
-## Working With Graph Data (`A` and `X`) in Your Codebase
+## 🧩 Working With Graph Data (`A` and `X`) in Your Codebase
 
 Use:
 
