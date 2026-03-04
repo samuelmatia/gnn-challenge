@@ -1,0 +1,236 @@
+name: Score Submission
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, closed]
+    paths:
+      - 'submissions/inbox/**'
+  workflow_dispatch:
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - name: Checkout code (base branch only)
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas scikit-learn torch torch-geometric
+
+      - name: Restore private test labels
+        env:
+          TEST_LABELS_CSV_B64: ${{ secrets.TEST_LABELS_CSV_B64 }}
+        run: |
+          if [ -z "$TEST_LABELS_CSV_B64" ]; then
+            echo "Missing TEST_LABELS_CSV_B64 secret"
+            exit 1
+          fi
+          mkdir -p data
+          echo "$TEST_LABELS_CSV_B64" | base64 -d > data/test_labels.csv
+
+      - name: Find submission file (from PR)
+        id: find_submission
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setFailed("No pull request context available.");
+              return;
+            }
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              }
+            );
+            const predictionFile = files
+              .map(f => f.filename)
+              .find(name => name.startsWith("submissions/inbox/") && name.endsWith("/predictions.csv"));
+            const metadataFile = files
+              .map(f => f.filename)
+              .find(name => name.startsWith("submissions/inbox/") && name.endsWith("/metadata.json"));
+
+            if (!predictionFile || !metadataFile) {
+              core.setFailed("Submission must include predictions.csv and metadata.json under submissions/inbox/<team>/<run_id>/");
+              return;
+            }
+
+            const parts = predictionFile.split("/");
+            if (parts.length < 5) {
+              core.setFailed("Invalid submission path. Expected submissions/inbox/<team>/<run_id>/predictions.csv");
+              return;
+            }
+
+            core.setOutput("prediction", predictionFile);
+            core.setOutput("metadata", metadataFile);
+            core.setOutput("head_repo", pr.head.repo.full_name);
+            core.setOutput("head_sha", pr.head.sha);
+            core.setOutput("submitter", pr.user.login);
+            core.setOutput("pr_number", pr.number);
+            core.setOutput("team", parts[2]);
+            core.setOutput("run_id", parts[3]);
+
+      - name: Download submission files (read-only)
+        id: download_submission
+        env:
+          PRED_PATH: ${{ steps.find_submission.outputs.prediction }}
+          META_PATH: ${{ steps.find_submission.outputs.metadata }}
+          HEAD_REPO: ${{ steps.find_submission.outputs.head_repo }}
+          HEAD_SHA: ${{ steps.find_submission.outputs.head_sha }}
+        run: |
+          if [ -z "$PRED_PATH" ] || [ -z "$META_PATH" ] || [ -z "$HEAD_REPO" ] || [ -z "$HEAD_SHA" ]; then
+            echo "Missing PR submission metadata"
+            exit 1
+          fi
+          case "$PRED_PATH" in
+            submissions/inbox/*/*/predictions.csv) ;;
+            *) echo "Invalid submission path: $PRED_PATH"; exit 1 ;;
+          esac
+          case "$META_PATH" in
+            submissions/inbox/*/*/metadata.json) ;;
+            *) echo "Invalid metadata path: $META_PATH"; exit 1 ;;
+          esac
+          PRED_URL="https://raw.githubusercontent.com/${HEAD_REPO}/${HEAD_SHA}/${PRED_PATH}"
+          META_URL="https://raw.githubusercontent.com/${HEAD_REPO}/${HEAD_SHA}/${META_PATH}"
+          curl -fsSL "$PRED_URL" -o /tmp/pr_predictions.csv
+          curl -fsSL "$META_URL" -o /tmp/pr_metadata.json
+
+      - name: Enforce one submission attempt per participant
+        env:
+          SUBMITTER: ${{ steps.find_submission.outputs.submitter }}
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import os
+          import sys
+          from pathlib import Path
+
+          submitter = os.environ.get("SUBMITTER", "").strip().lower()
+          if not submitter:
+              print("❌ Missing submitter identity for policy enforcement.")
+              sys.exit(1)
+
+          leaderboard_csv = Path("leaderboard/leaderboard.csv")
+          if not leaderboard_csv.exists():
+              print("ℹ️ leaderboard/leaderboard.csv not found yet; skipping one-attempt check.")
+              sys.exit(0)
+
+          prior_submitters = set()
+          with leaderboard_csv.open(newline="", encoding="utf-8") as f:
+              reader = csv.DictReader(f)
+              if reader.fieldnames and "submitter" in reader.fieldnames:
+                  prior_submitters.update(
+                      (row.get("submitter") or "").strip().lower()
+                      for row in reader
+                      if (row.get("submitter") or "").strip()
+                  )
+              else:
+                  print("ℹ️ 'submitter' column missing in leaderboard CSV; using metadata fallback scan.")
+
+          # Fallback/defense-in-depth: scan existing metadata files for submitter logins.
+          for meta_path in Path("submissions/inbox").glob("*/*/metadata.json"):
+              try:
+                  data = json.loads(meta_path.read_text(encoding="utf-8"))
+              except Exception:
+                  continue
+              s = (data.get("submitter") or "").strip().lower()
+              if s:
+                  prior_submitters.add(s)
+
+          if submitter in prior_submitters:
+              print(f"❌ Submission rejected: '{submitter}' has already submitted once. Only one attempt per participant is allowed.")
+              sys.exit(1)
+
+          print(f"✅ One-attempt policy check passed for '{submitter}'.")
+          PY
+
+      - name: Validate submission format
+        run: |
+          python competition/validate_submission.py /tmp/pr_predictions.csv
+
+      - name: Run scoring script
+        id: score
+        run: |
+          python scoring_script.py /tmp/pr_predictions.csv
+        continue-on-error: true
+
+      - name: Extract metrics and comment
+        if: steps.score.outcome == 'success'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const submissionFile = "/tmp/pr_predictions.csv";
+            const metrics = require('child_process').execSync(
+              `python scoring_script.py ${submissionFile}`,
+              { encoding: 'utf-8' }
+            );
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🏆 Submission Scored\n\n\`\`\`\n${metrics}\n\`\`\`\n\nCheck the [leaderboard](https://github.com/${{ github.repository }}/blob/main/leaderboard.md) for rankings!`
+            });
+
+      - name: Update leaderboard
+        if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        env:
+          SUBMITTER: ${{ steps.find_submission.outputs.submitter }}
+          PR_NUMBER: ${{ steps.find_submission.outputs.pr_number }}
+          TEAM: ${{ steps.find_submission.outputs.team }}
+          RUN_ID: ${{ steps.find_submission.outputs.run_id }}
+        run: |
+          mkdir -p "submissions/inbox/${TEAM}/${RUN_ID}"
+          cp /tmp/pr_predictions.csv "submissions/inbox/${TEAM}/${RUN_ID}/predictions.csv"
+          # Merge submitter info into metadata.json
+          python - <<'PY'
+          import json
+          import os
+          meta_path = "submissions/inbox/${TEAM}/${RUN_ID}/metadata.json"
+          try:
+              with open("/tmp/pr_metadata.json", "r", encoding="utf-8") as f:
+                  meta = json.load(f)
+          except Exception:
+              meta = {}
+          meta["submitter"] = os.environ.get("SUBMITTER", "")
+          meta["pr_number"] = os.environ.get("PR_NUMBER", "")
+          team = os.environ.get("TEAM", "")
+          run_id = os.environ.get("RUN_ID", "")
+          meta_path = f"submissions/inbox/{team}/{run_id}/metadata.json"
+          with open(meta_path, "w", encoding="utf-8") as f:
+              json.dump(meta, f, indent=2)
+          PY
+          python update_leaderboard.py
+          python competition/render_leaderboard.py
+
+      - name: Commit leaderboard update
+        if: github.event_name == 'pull_request_target' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add leaderboard/leaderboard.csv docs/leaderboard.csv leaderboard.md submissions/inbox
+          git commit -m "Update leaderboard with new submission" || true
+          git push
+
+      - name: Cleanup private labels
+        if: always()
+        run: |
+          rm -f data/test_labels.csv
+
+          

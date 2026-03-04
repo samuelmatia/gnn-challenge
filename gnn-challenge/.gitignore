@@ -1,0 +1,9 @@
+venv/
+.DS_Store
+
+data/test_labels.csv
+personal_test.py
+venv311/
+
+testing/
+tvenv

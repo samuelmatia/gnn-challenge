@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GNN Challenge Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="leaderboard.css" />
+</head>
+<body>
+  <div class="bg-orb bg-orb-left" aria-hidden="true"></div>
+  <div class="bg-orb bg-orb-right" aria-hidden="true"></div>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="kicker">GLIMPS-GNN Benchmark</p>
+      <h1>Leaderboard</h1>
+      <p class="hero-subtitle">Human and LLM submissions evaluated on the hidden test split.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="stats" aria-label="Leaderboard summary">
+      <article class="stat-card">
+        <p class="stat-label">Total Submissions</p>
+        <p class="stat-value" id="statTotal">-</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Best F1 Score</p>
+        <p class="stat-value" id="statTopF1">-</p>
+      </article>
+      <article class="stat-card">
+        <p class="stat-label">Visible Entries</p>
+        <p class="stat-value" id="statVisible">-</p>
+      </article>
+    </section>
+
+    <section class="controls" aria-label="Filters and sorting">
+      <label class="field">
+        <span class="field-label">Search</span>
+        <input id="search" type="search" placeholder="Team, run, model, submitter..." />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Model Type</span>
+        <select id="typeFilter">
+          <option value="all">All types</option>
+          <option value="human">Human</option>
+          <option value="llm">LLM</option>
+          <option value="hybrid">Human + LLM</option>
+          <option value="unknown">Unknown</option>
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field-label">Sort</span>
+        <select id="sortBy">
+          <option value="f1_score">F1 score</option>
+          <option value="accuracy">Accuracy</option>
+          <option value="precision">Precision</option>
+          <option value="recall">Recall</option>
+          <option value="submission_date">Submission date</option>
+        </select>
+      </label>
+    </section>
+
+    <p class="status-message" id="statusMessage" role="status" aria-live="polite">Loading leaderboard...</p>
+
+    <section class="table-wrap" aria-label="Leaderboard table">
+      <table id="leaderboard">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Team</th>
+            <th>Run</th>
+            <th>Model</th>
+            <th>Type</th>
+            <th>F1</th>
+            <th>Accuracy</th>
+            <th>Precision</th>
+            <th>Recall</th>
+            <th>Date</th>
+            <th>Submitter</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty-state" id="emptyState" hidden>No submissions match your current filters.</p>
+    </section>
+  </main>
+
+  <script src="leaderboard.js"></script>
+</body>
+</html>
