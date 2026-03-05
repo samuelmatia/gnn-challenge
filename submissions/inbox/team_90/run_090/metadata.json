@@ -2,5 +2,7 @@
   "team": "team_90",
   "run_id": "run_090",
   "model_name": "My GNN v090",
-  "model_type": "human"
+  "model_type": "human",
+  "submitter": "mubbytheback",
+  "pr_number": "29"
 }
