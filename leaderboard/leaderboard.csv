@@ -1,2 +1,2 @@
 rank,team,run_id,model,model_type,f1_score,accuracy,precision,recall,submission_date,submitter,submitter_url,pr_number,submission_path
-1,organizers,advanced_gnn,Advanced GNN (GraphSAGE),human,0.33,0.4,0.15,0.12,2026-03-07 22:34,organizer_bot,https://github.com/organizer_bot,,submissions/inbox/organizers/advanced_gnn/predictions.csv
+1,organizers,advanced_gnn,Advanced GNN (GraphSAGE),human,0.33,0.4,0.15,0.12,2026-03-07 23:15,organizer_bot,https://github.com/organizer_bot,,submissions/inbox/organizers/advanced_gnn/predictions.csv

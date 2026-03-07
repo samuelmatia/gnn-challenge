@@ -4,7 +4,7 @@
 
 | Rank | Team | Run | Model | Type | F1-Score | Accuracy | Precision | Recall | Date | Submitter |
 |------|------|-----|-------|------|----------|----------|-----------|--------|------|-----------|
-| 1 | organizers | advanced_gnn | Advanced GNN (GraphSAGE) | human | 0.33 | 0.40 | 0.15 | 0.12 | 2026-03-07 22:34 | [organizer_bot](https://github.com/organizer_bot) |
+| 1 | organizers | advanced_gnn | Advanced GNN (GraphSAGE) | human | 0.33 | 0.40 | 0.15 | 0.12 | 2026-03-07 23:15 | [organizer_bot](https://github.com/organizer_bot) |
 
 ## Notes
 - This leaderboard is auto-generated from `leaderboard/leaderboard.csv`.
