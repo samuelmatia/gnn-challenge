@@ -56,8 +56,9 @@ Import organizer public key and encrypt:
 ```bash
 gpg --import .github/keys/submission_public.asc
 gpg --list-keys
+CI_FPR=$(gpg --show-keys --with-colons .github/keys/submission_public.asc | awk -F: '/^fpr:/ {print $10; exit}')
 gpg --output submissions/inbox/<team>/<run_id>/predictions.csv.enc \
-  --encrypt --recipient 9BBACC5C951961B9B836574110DC3903B67F4800 \
+  --encrypt --recipient "$CI_FPR" \
   predictions.csv
 ```
 
