@@ -319,6 +319,7 @@ jobs:
       - name: Regenerate leaderboard artifacts
         env:
           SUBMISSION_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SUBMISSION_PRIVATE_KEY_PASSPHRASE }}
+          GNUPGHOME: /tmp/gnupg_submission
         run: |
           python update_leaderboard.py
           python competition/render_leaderboard.py
