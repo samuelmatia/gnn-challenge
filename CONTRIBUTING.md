@@ -74,6 +74,8 @@ Commit only encrypted artifact + metadata:
 git add submissions/inbox/<team>/<run_id>/predictions.csv.enc
 git add submissions/inbox/<team>/<run_id>/metadata.json
 git status
+git commit -m '<team name> commit'
+git push origin <branch name>
 ```
 
 Example metadata:
